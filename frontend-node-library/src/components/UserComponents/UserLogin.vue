@@ -1,54 +1,55 @@
 <template>
-  <form @submit.prevent="handleLogin">
+  <form @submit.prevent="login">
     <input v-model="credentials.email" type="email" placeholder="Email" required />
     <input v-model="credentials.password" type="password" placeholder="Password" required />
     <button type="submit">Login</button>
   </form>
+
+  <p>{{ message }}</p>
+
 </template>
 
 <script setup lang="ts">
-import { reactive } from "vue";
-import axios from "axios"; 
+import { ref } from "vue";
+import axios from "axios";
+import { useRouter } from "vue-router";
+import { useUserStore } from "@/stores/userStore";
 
-// Déclare un type pour les credentials
-interface Credentials {
-  email: string;
-  password: string;
-}
+const router = useRouter();
 
-// Déclare un type pour la réponse de l'API
-interface AuthResponse {
-  token: string;
-  user: {
-    id: number;
-    email: string;
-    role: string;
-  };
-}
-
-// État réactif pour les credentials
-const credentials = reactive<Credentials>({
+// Objet regroupant les données de connexion
+const credentials = ref({
   email: "",
   password: "",
 });
 
-// Fonction pour gérer la connexion
-const handleLogin = async (): Promise<void> => {
+// Message de retour pour afficher le résultat de la connexion
+const message = ref("");
+
+const login = async () => {
   try {
-    // Requête POST à l'API avec le typage de la réponse
-    const response = await axios.post<AuthResponse>(
-      "http://localhost:3000/auth/login",
-      credentials
+    // Envoi de l'objet credentials au serveur pour la connexion
+    await axios.post("http://localhost:3000/auth/login", credentials.value,
+     {withCredentials: true}
     );
-
-    const { token, user } = response.data;
-
-    // Stocke le token dans le localStorage pour la session utilisateur
-    localStorage.setItem("authToken", token);
-    alert(`Welcome ${user.email}, your role is ${user.role}`);
+    await useUserStore().fetchUser();
+    router.push({ name: "Home" });
+    message.value = "Login successful!";
   } catch (error) {
-    console.error("Login error:", error);
-    alert("Invalid email or password. Please try again.");
+    message.value = error.response?.data?.message || "Login failed!";
   }
 };
+
 </script>
+
+<style scoped>
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+button {
+  margin-top: 10px;
+}
+</style>

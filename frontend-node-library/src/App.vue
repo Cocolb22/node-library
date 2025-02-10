@@ -3,6 +3,7 @@
     <nav>
       <NavbarComponent />
     </nav>
+    <AlertMessageComponent />
   </header>
 
   <RouterView />
@@ -10,7 +11,8 @@
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import NavbarComponent from './components/SharedComponents/Navbar.vue'
+import NavbarComponent from './components/SharedComponents/NavbarComponent.vue';
+import AlertMessageComponent from './components/SharedComponents/AlertMessageComponent.vue';
 
 </script>
 

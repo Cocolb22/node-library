@@ -7,8 +7,8 @@ export const AppDataSource = new DataSource({
   username: "corentin",
   password: "sckoll22",
   database: "library_db",
-  synchronize: true, // Synchronise les entités automatiquement (à désactiver en production)
-  migrations:[__dirname + "/migrations/*.ts"],
-  entities: [__dirname + "/entities/*.ts"], // Où se trouvent les entités
+  synchronize: true,
+  migrations:["src/migrations/*.ts"],
+  entities: ["src/entities/*.ts"],
   logging: true,
 });

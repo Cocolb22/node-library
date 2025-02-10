@@ -1,48 +1,62 @@
 <template>
-  <form @submit.prevent="handleUpdate">
-    <input v-model="user.firstName" placeholder="First Name" required />
-    <input v-model="user.lastName" placeholder="Last Name" required />
-    <input v-model="user.email" type="email" placeholder="Email" required />
-    <input v-model.number="user.password" placeholder="password" required />
-    <button type="submit">Update</button>
-    <button type="button" @click="handleDelete">Delete</button>
-  </form>
+  <div>
+    <h1>Modifier vos informations</h1>
+    <form @submit.prevent="updateUser">
+      <input v-model="user.firstName" placeholder="Prénom" />
+      <input v-model="user.lastName" placeholder="Nom" />
+      <input v-model="user.email" placeholder="Email" />
+      <input v-model="password" type="password" placeholder="Mot de passe" />
+      <button type="submit">Mettre à jour</button>
+    </form>
+    <button @click="deleteUser" class="delete-btn">Supprimer mon compte</button>
+  </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, reactive, onMounted } from "vue";
-import axios from "axios";
-import { useRoute, useRouter } from "vue-router";
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import { userService } from "@/services/userService";
 
-export default defineComponent({
-  name: "UserDetails",
-  setup() {
-    const route = useRoute();
-    const router = useRouter();
-    const user = reactive({ firstName: "", lastName: "", email: "", password: "" });
+const user = userService.user;
+const password = ref(""); // Ne pas stocker le mot de passe dans `userService`
 
-    const fetchUser = async () => {
-      const response = await axios.get(
-        `http://localhost:3000/users/${route.params.id}`
-      );
-      Object.assign(user, response.data);
-    };
-
-    const handleUpdate = async () => {
-      await axios.put(`http://localhost:3000/users/${route.params.id}`, user);
-      alert("User updated successfully!");
-      router.push("/");
-    };
-
-    const handleDelete = async () => {
-      await axios.delete(`http://localhost:3000/users/${route.params.id}`);
-      alert("User deleted successfully!");
-      router.push("/");
-    };
-
-    onMounted(fetchUser);
-
-    return { user, handleUpdate, handleDelete };
-  },
+onMounted(() => {
+  userService.fetchUser();
 });
+
+const updateUser = async () => {
+  try {
+    await userService.updateUser({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      password: user.password,
+    });
+    alert("Mise à jour réussie !");
+  } catch {
+    alert("Erreur lors de la mise à jour");
+  }
+};
+
+const deleteUser = async () => {
+  if (confirm("Êtes-vous sûr de vouloir supprimer votre compte ?")) {
+    try {
+      await userService.deleteUser();
+      alert("Compte supprimé !");
+      window.location.href = "/"; // Rediriger vers l'accueil après suppression
+    } catch {
+      alert("Erreur lors de la suppression du compte");
+    }
+  }
+};
 </script>
+
+<style scoped>
+.delete-btn {
+  margin-top: 10px;
+  background-color: red;
+  color: white;
+  padding: 8px;
+  border: none;
+  cursor: pointer;
+}
+</style>
