@@ -1,4 +1,4 @@
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import axios from "axios";
 
 export const userService = {
@@ -16,6 +16,7 @@ export const userService = {
       const response = await axios.get("http://localhost:3000/auth/get_current_user", {
         withCredentials: true,
       });
+      console.log("réponse", response.data);
 
       if (response.data.user) {
         return {
@@ -33,8 +34,22 @@ export const userService = {
     }
   },
 
+  async fetchUsers() {
+    const users = ref([]);
+        try {
+          const response = await axios.get("http://localhost:3000/users", { withCredentials: true });
+          users.value = response.data;
+          console.log("Users fetched:", users.value);
+          return users.value;
+        } catch (error) {
+          console.error("Failed to fetch users:", error);
+          return [];
+        }
+    },
+
+
   // Mettre à jour les informations utilisateur
-  async updateUser(updatedData: { firstName?: string; lastName?: string; email?: string; password?: string }) {
+  async updateUser(updatedData: {id?: number; firstName?: string; lastName?: string; email?: string; password?: string }) {
     if (!this.user.id) {
       throw new Error("Impossible de mettre à jour : ID utilisateur manquant.");
     }
@@ -48,8 +63,10 @@ export const userService = {
 
       // Mettre à jour les données locales
       Object.assign(this.user, response.data);
-
+      console.log("user", this.user);
+      console.log("response dans update", response.data);
       return response.data;
+
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'utilisateur :", error);
       throw error;

@@ -29,12 +29,16 @@ router.get("/:id", async (req, res) => {
 // UPDATE User
 router.put("/:id", async (req, res) => {
   const updatedUser = await userService.update(Number(req.params.id), req.body);
+  if (req.session.user && updatedUser) {
+    req.session.user = updatedUser;
+  }
   res.json(updatedUser);
 });
 
 // DELETE User
 router.delete("/:id", async (req, res) => {
   await userService.delete(Number(req.params.id));
+  req.session.destroy(() => console.log("User destroyed"));
   res.status(204).send();
 });
 

@@ -1,5 +1,6 @@
 import { AppDataSource } from "../data-source";
 import { User } from "../entities/User";
+import bcrypt from "bcrypt";
 
 export class UserService {
   private userRepository = AppDataSource.getRepository(User);
@@ -18,6 +19,10 @@ export class UserService {
   }
 
   async update(id: number, userData: Partial<User>) {
+    if (userData.password) {
+      userData.password = await bcrypt.hash(userData.password
+      , 10);
+    }
     await this.userRepository.update(id, userData);
     return await this.findById(id);
   }

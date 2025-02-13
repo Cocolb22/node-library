@@ -12,9 +12,6 @@ export const isAuthenticated = (
 ): void => {
   const token = req.session.token;
 
-  console.log("🔹 Token récupéré depuis la session:", token);
-  console.log("Session actuelle :", req.session);
-
   if (!token) {
     res.status(401).json({ message: 'Non authentifié' });
     return;
